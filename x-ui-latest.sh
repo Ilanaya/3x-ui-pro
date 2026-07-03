@@ -1,15 +1,20 @@
 #!/bin/bash
-#################### x-ui-pro-refactor @ github.com/mozaroc #############################
-[[ $EUID -ne 0 ]] && { echo "Run as root: sudo bash $0"; exit 1; }
+#################### x-ui-pro-refactor @ github.com/ilanaya #############################
+[[ $EUID -ne 0 ]] && {
+    echo "Run as root: sudo bash $0"
+    exit 1
+}
 
 # ─── Output helpers ──────────────────────────────────────────────────────────
-msg_ok()  { echo -e "\e[1;42m $1 \e[0m"; }
+msg_ok() { echo -e "\e[1;42m $1 \e[0m"; }
 msg_err() { echo -e "\e[1;41m $1 \e[0m"; }
 msg_inf() { echo -e "\e[1;34m$1\e[0m"; }
 
-echo; msg_inf '           ___    _   _   _  '
-msg_inf      ' \/ __ | |  | __ |_) |_) / \ '
-msg_inf      ' /\    |_| _|_   |   | \ \_/ '; echo
+echo
+msg_inf '           ___    _   _   _  '
+msg_inf ' \/ __ | |  | __ |_) |_) / \ '
+msg_inf ' /\    |_| _|_   |   | \ \_/ '
+echo
 
 # ─── Pre-flight checks ───────────────────────────────────────────────────────
 check_os() {
@@ -18,12 +23,12 @@ check_os() {
     os_version=$(grep -oP '(?<=^VERSION_ID=").+(?=")' /etc/os-release 2>/dev/null)
 
     case "${os_id}" in
-        ubuntu)
-            [[ "$os_version" == "24.04" || "$os_version" == "26.04" ]] && return 0
-            ;;
-        debian)
-            [[ "$os_version" == "12" || "$os_version" == "13" ]] && return 0
-            ;;
+    ubuntu)
+        [[ "$os_version" == "24.04" || "$os_version" == "26.04" ]] && return 0
+        ;;
+    debian)
+        [[ "$os_version" == "12" || "$os_version" == "13" ]] && return 0
+        ;;
     esac
 
     msg_err "Unsupported OS: ${os_id} ${os_version}"
@@ -47,11 +52,11 @@ check_cpu() {
 }
 
 check_os
-check_cpu
+# check_cpu
 
 # ─── Constants ───────────────────────────────────────────────────────────────
 XUIDB="/etc/x-ui/x-ui.db"
-GITHUB_RAW="https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main"
+GITHUB_RAW="https://raw.githubusercontent.com/ilanaya/3x-ui-pro/main"
 FAKE_SITE_COUNT=50
 
 # ─── Default argument values ─────────────────────────────────────────────────
@@ -75,7 +80,7 @@ clean_previous_install() {
 
 # ─── Port / path generators ──────────────────────────────────────────────────
 get_port() {
-    echo $(( ((RANDOM<<15)|RANDOM) % 49152 + 10000 ))
+    echo $((((RANDOM << 15) | RANDOM) % 49152 + 10000))
 }
 
 gen_random_string() {
@@ -121,13 +126,31 @@ mtr_backend_port=$(make_port)
 # ─── Argument parsing ────────────────────────────────────────────────────────
 while [ "$#" -gt 0 ]; do
     case "$1" in
-        -auto_domain)      AUTODOMAIN="$2";       shift 2 ;;
-        -install)          INSTALL="$2";           shift 2 ;;
-        -subdomain)        domain="$2";            shift 2 ;;
-        -reality_domain)   reality_domain="$2";    shift 2 ;;
-        -ONLY_CF_IP_ALLOW) CFALLOW="$2";           shift 2 ;;
-        -uninstall)        UNINSTALL="$2";         shift 2 ;;
-        *)                 shift 1 ;;
+    -auto_domain)
+        AUTODOMAIN="$2"
+        shift 2
+        ;;
+    -install)
+        INSTALL="$2"
+        shift 2
+        ;;
+    -subdomain)
+        domain="$2"
+        shift 2
+        ;;
+    -reality_domain)
+        reality_domain="$2"
+        shift 2
+        ;;
+    -ONLY_CF_IP_ALLOW)
+        CFALLOW="$2"
+        shift 2
+        ;;
+    -uninstall)
+        UNINSTALL="$2"
+        shift 2
+        ;;
+    *) shift 1 ;;
     esac
 done
 
@@ -140,9 +163,9 @@ Pak=$(type apt &>/dev/null && echo "apt" || echo "yum")
 uninstall_xui() {
     printf 'y\n' | x-ui uninstall 2>/dev/null || true
     rm -rf /etc/x-ui/ /usr/local/x-ui/
-    rm -f  /usr/bin/x-ui
+    rm -f /usr/bin/x-ui
     $Pak -y remove nginx nginx-common nginx-core nginx-full python3-certbot-nginx
-    $Pak -y purge  nginx nginx-common nginx-core nginx-full python3-certbot-nginx
+    $Pak -y purge nginx nginx-common nginx-core nginx-full python3-certbot-nginx
     $Pak -y autoremove
     $Pak -y autoclean
     rm -rf /var/www/html/ /var/www/diagnostics/ /var/www/subpage/ /etc/nginx/ /usr/share/nginx/
@@ -189,8 +212,8 @@ validate_domains() {
         echo -en "Enter available subdomain (sub.domain.tld): " && read -r domain
     done
     domain=$(echo "$domain" | tr -d '[:space:]')
-    SubDomain=$(echo "$domain"   | sed 's/^[^ ]* \|\..*//g')
-    MainDomain=$(echo "$domain"  | sed 's/.*\.\([^.]*\..*\)$/\1/')
+    SubDomain=$(echo "$domain" | sed 's/^[^ ]* \|\..*//g')
+    MainDomain=$(echo "$domain" | sed 's/.*\.\([^.]*\..*\)$/\1/')
     [[ "${SubDomain}.${MainDomain}" != "${domain}" ]] && MainDomain=${domain}
 
     while true; do
@@ -264,7 +287,7 @@ get_ssl_certs() {
     mkdir -p /root/cert/${domain}
     chmod 755 /root/cert/*
     ln -sf /etc/letsencrypt/live/${domain}/fullchain.pem /root/cert/${domain}/fullchain.pem
-    ln -sf /etc/letsencrypt/live/${domain}/privkey.pem   /root/cert/${domain}/privkey.pem
+    ln -sf /etc/letsencrypt/live/${domain}/privkey.pem /root/cert/${domain}/privkey.pem
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -284,7 +307,7 @@ configure_nginx() {
     fi
 
     # SNI-based stream: reality → 8443, domain → 7443
-    cat > /etc/nginx/stream-enabled/stream.conf <<EOF
+    cat >/etc/nginx/stream-enabled/stream.conf <<EOF
 map \$ssl_preread_server_name \$sni_name {
     hostnames;
     ${reality_domain}    xray;
@@ -305,16 +328,16 @@ server {
 }
 EOF
 
-    grep -xqFR "stream { include /etc/nginx/stream-enabled/*.conf; }" /etc/nginx/* \
-        || echo "stream { include /etc/nginx/stream-enabled/*.conf; }" >> /etc/nginx/nginx.conf
-    grep -xqFR "load_module modules/ngx_stream_module.so;" /etc/nginx/* \
-        || sed -i '1s/^/load_module \/usr\/lib\/nginx\/modules\/ngx_stream_module.so; /' /etc/nginx/nginx.conf
-    grep -xqFR "worker_rlimit_nofile 16384;" /etc/nginx/* \
-        || echo "worker_rlimit_nofile 16384;" >> /etc/nginx/nginx.conf
+    grep -xqFR "stream { include /etc/nginx/stream-enabled/*.conf; }" /etc/nginx/* ||
+        echo "stream { include /etc/nginx/stream-enabled/*.conf; }" >>/etc/nginx/nginx.conf
+    grep -xqFR "load_module modules/ngx_stream_module.so;" /etc/nginx/* ||
+        sed -i '1s/^/load_module \/usr\/lib\/nginx\/modules\/ngx_stream_module.so; /' /etc/nginx/nginx.conf
+    grep -xqFR "worker_rlimit_nofile 16384;" /etc/nginx/* ||
+        echo "worker_rlimit_nofile 16384;" >>/etc/nginx/nginx.conf
     sed -i "/worker_connections/c\worker_connections 4096;" /etc/nginx/nginx.conf
 
     # HTTP → HTTPS redirect
-    cat > /etc/nginx/sites-available/80.conf <<EOF
+    cat >/etc/nginx/sites-available/80.conf <<EOF
 server {
     listen 80;
     server_name ${domain} ${reality_domain};
@@ -323,7 +346,7 @@ server {
 EOF
 
     # Shared proxy locations for xray inbounds (included by both vhosts)
-    cat > /etc/nginx/snippets/includes.conf <<EOF
+    cat >/etc/nginx/snippets/includes.conf <<EOF
     #Subscription — prefix location covers all sub-paths (assets, JS, etc.)
     location /${sub_path}/ {
         if (\$hack = 1) { return 404; }
@@ -423,7 +446,7 @@ EOF
 EOF
 
     # Main domain vhost (TLS termination at 7443, proxy_protocol)
-    cat > "/etc/nginx/sites-available/${domain}" <<EOF
+    cat >"/etc/nginx/sites-available/${domain}" <<EOF
 # Rate limiting zones (http context)
 limit_req_zone  \$binary_remote_addr zone=diag_api:10m  rate=6r/m;
 limit_req_zone  \$binary_remote_addr zone=diag_page:10m rate=30r/m;
@@ -624,7 +647,7 @@ server {
 EOF
 
     # Reality domain vhost (plain TLS at 9443, no proxy_protocol)
-    cat > "/etc/nginx/sites-available/${reality_domain}" <<EOF
+    cat >"/etc/nginx/sites-available/${reality_domain}" <<EOF
 server {
     server_tokens off;
     server_name ${reality_domain};
@@ -667,9 +690,9 @@ EOF
     # Activate configs
     if [[ -f "/etc/nginx/sites-available/${domain}" ]]; then
         rm -f /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
-        ln -sf "/etc/nginx/sites-available/${domain}"          /etc/nginx/sites-enabled/
-        ln -sf "/etc/nginx/sites-available/${reality_domain}"  /etc/nginx/sites-enabled/
-        ln -sf "/etc/nginx/sites-available/80.conf"            /etc/nginx/sites-enabled/
+        ln -sf "/etc/nginx/sites-available/${domain}" /etc/nginx/sites-enabled/
+        ln -sf "/etc/nginx/sites-available/${reality_domain}" /etc/nginx/sites-enabled/
+        ln -sf "/etc/nginx/sites-available/80.conf" /etc/nginx/sites-enabled/
     else
         msg_err "${domain} nginx config not found!" && exit 1
     fi
@@ -686,14 +709,14 @@ EOF
 # ─────────────────────────────────────────────────────────────────────────────
 _arch() {
     case "$(uname -m)" in
-        x86_64|x64|amd64)          echo 'amd64'  ;;
-        i*86|x86)                  echo '386'    ;;
-        armv8*|armv8|arm64|aarch64) echo 'arm64' ;;
-        armv7*|armv7|arm)          echo 'armv7'  ;;
-        armv6*|armv6)              echo 'armv6'  ;;
-        armv5*|armv5)              echo 'armv5'  ;;
-        s390x)                     echo 's390x'  ;;
-        *) echo "Unsupported CPU architecture!" && exit 1 ;;
+    x86_64 | x64 | amd64) echo 'amd64' ;;
+    i*86 | x86) echo '386' ;;
+    armv8* | armv8 | arm64 | aarch64) echo 'arm64' ;;
+    armv7* | armv7 | arm) echo 'armv7' ;;
+    armv6* | armv6) echo 'armv6' ;;
+    armv5* | armv5) echo 'armv5' ;;
+    s390x) echo 's390x' ;;
+    *) echo "Unsupported CPU architecture!" && exit 1 ;;
     esac
 }
 
@@ -708,11 +731,11 @@ install_panel() {
 
     cd /usr/local/
 
-    tag_version=$(curl -Ls "https://api.github.com/repos/MHSanaei/3x-ui/releases/latest" \
-        | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    tag_version=$(curl -Ls "https://api.github.com/repos/MHSanaei/3x-ui/releases/latest" |
+        grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
     if [[ -z "$tag_version" ]]; then
-        tag_version=$(curl -4 -Ls "https://api.github.com/repos/MHSanaei/3x-ui/releases/latest" \
-            | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        tag_version=$(curl -4 -Ls "https://api.github.com/repos/MHSanaei/3x-ui/releases/latest" |
+            grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
     fi
     if [[ -z "$tag_version" ]]; then
         echo "Failed to fetch 3x-ui version." && exit 1
@@ -726,7 +749,8 @@ install_panel() {
     wget -O /usr/bin/x-ui-temp https://raw.githubusercontent.com/MHSanaei/3x-ui/main/x-ui.sh
     [[ $? -ne 0 ]] && echo "Failed to download x-ui.sh" && exit 1
 
-    [[ -d /usr/local/x-ui/ ]] && systemctl stop x-ui 2>/dev/null; rm -rf /usr/local/x-ui/
+    [[ -d /usr/local/x-ui/ ]] && systemctl stop x-ui 2>/dev/null
+    rm -rf /usr/local/x-ui/
 
     tar zxvf x-ui-linux-$(_arch).tar.gz
     rm -f x-ui-linux-$(_arch).tar.gz
@@ -769,7 +793,7 @@ configure_xui_db() {
     [[ -f "$xray_bin" ]] || xray_bin="/usr/local/x-ui/bin/xray-linux-arm"
     output=$("$xray_bin" x25519)
     private_key=$(echo "$output" | grep "^PrivateKey:" | awk '{print $2}')
-    public_key=$(echo "$output"  | grep "^Password"   | awk '{print $3}')
+    public_key=$(echo "$output" | grep "^Password" | awk '{print $3}')
     trojan_pass=$(gen_random_string 10)
     emoji_flag=$(LC_ALL=en_US.UTF-8 curl -s --max-time 10 https://ipwho.is/ | jq -r '.flag.emoji' 2>/dev/null)
     [[ -z "$emoji_flag" || "$emoji_flag" == "null" ]] && emoji_flag="🌐"
@@ -779,8 +803,8 @@ configure_xui_db() {
 
     # Prepare short IDs for REALITY
     local shor
-    shor=($(openssl rand -hex 8) $(openssl rand -hex 8) $(openssl rand -hex 8) $(openssl rand -hex 8) \
-           $(openssl rand -hex 8) $(openssl rand -hex 8) $(openssl rand -hex 8) $(openssl rand -hex 8))
+    shor=($(openssl rand -hex 8) $(openssl rand -hex 8) $(openssl rand -hex 8) $(openssl rand -hex 8)
+    $(openssl rand -hex 8) $(openssl rand -hex 8) $(openssl rand -hex 8) $(openssl rand -hex 8))
 
     sqlite3 $XUIDB <<EOF
 DELETE FROM "settings" WHERE "key" IN ("webCertFile","webKeyFile");
@@ -969,13 +993,13 @@ VALUES
 EOF
 
     /usr/local/x-ui/x-ui setting \
-        -username  "${config_username}" \
-        -password  "${config_password}" \
-        -port      "${panel_port}"      \
+        -username "${config_username}" \
+        -password "${config_password}" \
+        -port "${panel_port}" \
         -webBasePath "${panel_path}"
 
     /usr/local/x-ui/x-ui cert \
-        -webCert    "/root/cert/${domain}/fullchain.pem" \
+        -webCert "/root/cert/${domain}/fullchain.pem" \
         -webCertKey "/root/cert/${domain}/privkey.pem"
 
     x-ui start
@@ -989,7 +1013,7 @@ install_clash_sub() {
     mkdir -p "${clash_dir}"
     if curl -fsSL "${GITHUB_RAW}/assets/clash/clash.yaml" -o "${clash_dir}/clash.yaml.tpl"; then
         # Substitute domain and sub_path; leave ${EMAIL} for mtr-backend to fill per-request
-        sed -i "s|\${DOMAIN}|${domain}|g"     "${clash_dir}/clash.yaml.tpl"
+        sed -i "s|\${DOMAIN}|${domain}|g" "${clash_dir}/clash.yaml.tpl"
         sed -i "s|\${SUB_PATH}|${sub_path}|g" "${clash_dir}/clash.yaml.tpl"
         chown -R www-data:www-data "${clash_dir}" 2>/dev/null || true
         chmod 644 "${clash_dir}/clash.yaml.tpl"
@@ -1000,7 +1024,7 @@ install_clash_sub() {
 }
 
 install_fake_site() {
-    local idx=$(( (RANDOM % FAKE_SITE_COUNT) + 1 ))
+    local idx=$(((RANDOM % FAKE_SITE_COUNT) + 1))
     local site_id
     site_id=$(printf "site-%02d" "$idx")
     local url="${GITHUB_RAW}/assets/fake-sites/${site_id}/index.html"
@@ -1040,11 +1064,11 @@ install_diagnostics() {
     # Test download files
     local testfiles="${diag_webroot}/testfiles"
     mkdir -p "${testfiles}"
-    [[ -f "${testfiles}/test-15k.bin"  ]] || dd if=/dev/zero bs=1024    count=15   of="${testfiles}/test-15k.bin"  status=none
-    [[ -f "${testfiles}/test-17k.bin"  ]] || dd if=/dev/zero bs=1024    count=17   of="${testfiles}/test-17k.bin"  status=none
-    [[ -f "${testfiles}/test-100m.bin" ]] || dd if=/dev/zero bs=1048576 count=100  of="${testfiles}/test-100m.bin" status=none
-    [[ -f "${testfiles}/test-1g.bin"   ]] || dd if=/dev/zero bs=1048576 count=1024 of="${testfiles}/test-1g.bin"   status=none
-    rm -f "${testfiles}/test-512m.bin"   # only used by the old single-stream speed test
+    [[ -f "${testfiles}/test-15k.bin" ]] || dd if=/dev/zero bs=1024 count=15 of="${testfiles}/test-15k.bin" status=none
+    [[ -f "${testfiles}/test-17k.bin" ]] || dd if=/dev/zero bs=1024 count=17 of="${testfiles}/test-17k.bin" status=none
+    [[ -f "${testfiles}/test-100m.bin" ]] || dd if=/dev/zero bs=1048576 count=100 of="${testfiles}/test-100m.bin" status=none
+    [[ -f "${testfiles}/test-1g.bin" ]] || dd if=/dev/zero bs=1048576 count=1024 of="${testfiles}/test-1g.bin" status=none
+    rm -f "${testfiles}/test-512m.bin" # only used by the old single-stream speed test
     chown -R www-data:www-data "${diag_webroot}" 2>/dev/null || true
 
     # MTR backend Python script
@@ -1056,11 +1080,11 @@ install_diagnostics() {
     command -v setcap &>/dev/null && setcap cap_net_raw+ep "$(command -v mtr)" 2>/dev/null || true
 
     # Dedicated system user for mtr-backend
-    id mtr-backend &>/dev/null || \
+    id mtr-backend &>/dev/null ||
         useradd --system --no-create-home --shell /usr/sbin/nologin mtr-backend
 
     # Systemd service for mtr-backend
-    cat > /etc/systemd/system/mtr-backend.service <<EOF
+    cat >/etc/systemd/system/mtr-backend.service <<EOF
 [Unit]
 Description=3x-ui-pro MTR diagnostics backend
 After=network.target
@@ -1120,7 +1144,7 @@ tune_system() {
         "net.ipv4.tcp_wmem=4096 65536 16777216"
     )
     for p in "${params[@]}"; do
-        grep -qxF "$p" /etc/sysctl.conf || echo "$p" >> /etc/sysctl.conf
+        grep -qxF "$p" /etc/sysctl.conf || echo "$p" >>/etc/sysctl.conf
     done
     sysctl -p
 }
@@ -1130,10 +1154,16 @@ tune_system() {
 # ─────────────────────────────────────────────────────────────────────────────
 setup_cron() {
     crontab -l 2>/dev/null | grep -v "certbot\|x-ui\|cloudflareips" | crontab -
-    (crontab -l 2>/dev/null; echo '@daily   x-ui restart > /dev/null 2>&1 && nginx -s reload')    | crontab -
+    (
+        crontab -l 2>/dev/null
+        echo '@daily   x-ui restart > /dev/null 2>&1 && nginx -s reload'
+    ) | crontab -
     # Certs were issued with --standalone: renewal needs port 80 free,
     # so stop nginx for the few seconds certbot runs
-    (crontab -l 2>/dev/null; echo '@monthly certbot renew --non-interactive --pre-hook "systemctl stop nginx" --post-hook "systemctl start nginx" > /dev/null 2>&1') | crontab -
+    (
+        crontab -l 2>/dev/null
+        echo '@monthly certbot renew --non-interactive --pre-hook "systemctl stop nginx" --post-hook "systemctl start nginx" > /dev/null 2>&1'
+    ) | crontab -
 }
 
 # ─────────────────────────────────────────────────────────────────────────────

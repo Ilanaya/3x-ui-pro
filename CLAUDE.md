@@ -19,7 +19,7 @@ assets/
 ```
 
 Scripts download assets at install time from this repo's raw GitHub URL
-(`https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/...`) — changes take
+(`https://raw.githubusercontent.com/ilanaya/3x-ui-pro/main/...`) — changes take
 effect on servers only after push to `main`.
 
 ## What x-ui-latest.sh does
@@ -80,12 +80,12 @@ IP = `api/st/getip`. Speedtest locations use `limit_conn`, not `limit_req`
 ## Running
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/x-ui-latest.sh) \
+bash <(curl -fsSL https://raw.githubusercontent.com/ilanaya/3x-ui-pro/main/x-ui-latest.sh) \
   -install y -subdomain panel.example.com -reality_domain r.example.com
 ```
 
 Patch an existing install (re-reads ports/paths from x-ui.db and nginx):
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/x-ui-patch.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/ilanaya/3x-ui-pro/main/x-ui-patch.sh)
 ```

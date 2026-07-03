@@ -28,7 +28,7 @@
 **Шаг 1 — скачать скрипт**
 
 ```bash
-wget -qO x-ui-latest.sh https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/x-ui-latest.sh
+wget -qO x-ui-latest.sh https://raw.githubusercontent.com/ilanaya/3x-ui-pro/main/x-ui-latest.sh
 ```
 
 **Шаг 2 — запустить**
@@ -77,7 +77,7 @@ bash x-ui-latest.sh -uninstall y
 **Установить скрипт бэкапа**
 
 ```bash
-wget -qO /usr/local/bin/x-ui-backup https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/assets/backup/x-ui-backup.sh
+wget -qO /usr/local/bin/x-ui-backup https://raw.githubusercontent.com/ilanaya/3x-ui-pro/main/assets/backup/x-ui-backup.sh
 chmod +x /usr/local/bin/x-ui-backup
 ```
 
